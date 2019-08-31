@@ -16,9 +16,9 @@ namespace RedditTwitterSyndicator
     public static class RedditPull
     {
         [FunctionName("RedditPull")]
-        public static async Task Run([TimerTrigger("0 0 23 * * *", RunOnStartup = false)]TimerInfo myTimer, ILogger log)
+        public static async Task Run([TimerTrigger("0/15 * * * * *", RunOnStartup = false)]TimerInfo myTimer, ILogger log)
         {
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            log.LogInformation($"RedditPull timer trigger function executed at: {DateTime.Now}");
             string accessToken = GetAccessToken(log);
             List<RedditPost> redditPosts = GetTopPosts(log, accessToken);
             await WriteToTable(log,redditPosts);
@@ -65,7 +65,7 @@ namespace RedditTwitterSyndicator
         private static List<RedditPost> GetTopPosts(ILogger log, string accessToken)
         {
             RestClient client = new RestClient("https://oauth.reddit.com");
-            RestRequest request = new RestRequest("/r/me_irl/top", Method.GET);
+            RestRequest request = new RestRequest("/r/WindowsSecurity/new", Method.GET);
             request.AddHeader("User-Agent", Environment.GetEnvironmentVariable("USER_AGENT"));
             request.AddHeader("x-li-format", "json");
             request.AddHeader("Authorization", $"bearer {accessToken}");
@@ -75,7 +75,7 @@ namespace RedditTwitterSyndicator
 
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                log.LogCritical("Failed to read top reddit posts");
+                log.LogCritical("Failed to read reddit posts");
             }
 
             var responseContent = JsonConvert.DeserializeObject<SubRedditPostQueryResponse>(response.Content.ToString());
